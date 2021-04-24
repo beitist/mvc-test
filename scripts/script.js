@@ -15,13 +15,12 @@ INPUT_BUTTON.addEventListener('click', readInputField);
 class Model {
   constructor() {
     this.entries = [];
+    this.addEntry = function(id) {
+      this.entries.push(new DataEntry(id));
+    }
 
     for (let i = 0; i < NUMBER_OF_ENTRIES; i++) {
       this.addEntry(i);
-    }
-
-    this.addEntry = function(id) {
-      this.entries.push(new DataEntry(id));
     }
 
     this.getEntrys = function() {
@@ -32,13 +31,6 @@ class Model {
       return entries;
     }
 
-    this.highlightById = function(id) {
-      for (const entry in this.entries) {
-        entry.isHighlighted = false;
-      }
-      this.entries[id].isHighlighted = true;
-      view.updateView();
-    }
   }
 }
 
@@ -59,7 +51,10 @@ class DataEntry {
 class View {
   constructor() {
     this.updateView = function() {
-      this.viewList.updateViewList();
+      this.viewList.mainNode.innerHTML = '';
+      for (const entryView of this.viewList.entries) {
+        this.viewList.mainNode.appendChild(entryView.node);
+      }
     }
 
     this.viewList = new ViewList();
@@ -90,7 +85,7 @@ class EntryView {
     this.entryButton.addEventListener('click', (function(idInternal) {
       controller.highlightSelectedNode(idInternal);
     })(id));
-    tempNode.appendChild(entryButton);
+    tempNode.appendChild(this.entryButton);
 
     this.node = tempNode;
     this.id = id;
@@ -103,13 +98,6 @@ class ViewList {
   constructor() {
     this.mainNode = UL_NODE;
     this.entries = [];
-
-    this.updateViewList = function() {
-      this.mainNode.innerHTML = '';
-      for (const node of this.entries) {
-        this.mainNode.appendChild(node);
-      }
-    }
   }
 }
 
@@ -121,23 +109,24 @@ class Controller {
   constructor() {
 
     this.init = function() {
-      this.createEntries;
+      this.createEntries();
     }
 
-    this.updateView = function() {
-      const dataEntries = model.getEntrys();
-      for (const entry of dataEntries) {
-
-      }
-    }
     this.createEntries = function() {
-      for (let i = 0; i < NUMBER_OF_ENTRIES; i++) {
-        view.addEntry(i);
+      let totalEntries = model.getEntrys();
+      for (const entry of totalEntries) {
+        view.addEntry(entry.id);
       }
+      view.updateView();
     }
 
     this.highlightSelectedNode = function(id) {
-      model.highlightById(id);
+      let totalEntries = model.getEntrys();
+      for (const entry of totalEntries) {
+        entry.isHighlighted = false;
+      }
+      totalEntries[id].isHighlighted = true;
+      view.updateView();
     }
   }
 }
@@ -148,3 +137,4 @@ class Controller {
 let model = new Model();
 let view = new View();
 let controller = new Controller();
+controller.init();
