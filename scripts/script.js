@@ -2,8 +2,13 @@
 const NUMBER_OF_ENTRIES = 3;
 const SECTION3_NODE = document.getElementById('section3');
 
-// model
 
+// model
+class Model {
+  constructor() {
+
+  }
+}
 
 
 
@@ -20,10 +25,25 @@ class View {
 }
 
 class Entry {
-  constructor() {
+  constructor(id) {
     let tempNode = document.createElement('div');
-    tempNode.id =
+    tempNode.id = id;
+    tempNode.classList.add = 'entry';
+    tempNode.innerText = 'This is entry Nr. ' + id;
+    this.node = tempNode;
+
+    this.alterIsHighlighted = function () {
+      if (this.isHighlighted) {
+        this.isHighlighted = false;
+      } else {
+        this.isHighlighted = true;
+      }
+    }
   }
+}
+
+class ViewList {
+
 }
 
 
