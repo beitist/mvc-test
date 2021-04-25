@@ -4,8 +4,9 @@
     <title>mvc design pattern</title>
     <link rel="stylesheet"
     href="https://unpkg.com/@highlightjs/cdn-assets@10.7.2/styles/default.min.css">
-<script src="https://unpkg.com/@highlightjs/cdn-assets@10.7.2/highlight.min.js" defer></script>
-    <link rel='stylesheet' src='design/style.css'></style>
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@10.7.2/highlight.min.js"></script>
+  <script defer>hljs.highlightAll();</script>    
+  <link rel='stylesheet' src='design/style.css'></style>
     <script src='scripts/script.js' defer></script>
   </head>
 
@@ -30,9 +31,12 @@
           and the actions (controller). Let's have a look at them:
         </p>
 
-        <p><h3>The model (or: the data)</h3></p>
+        <h3>The model (or: the data)</h3>
+        <p>
         The model consists of a data container that holds data objects. There is also a little init routine
-        that creates the (fake) data when the model is instantiated.
+        that creates the (fake) data when the model is instantiated. The constant <code>NUMBER_OF_ENTRIES</code>
+        is not really a constant, but can be updated by using the input field above.
+        </p>
         <pre><code class='javascript'>
 // model
 class Model {
@@ -62,7 +66,7 @@ class DataEntry {
         <p>
           The view is another object that updates the view output whenever it is called. It only
           has one function. It does not contain any data by itself except the node where it
-          should attach the view objects to.
+          should attach the view objects to. Of course, it also knows how it should display the data.
         </p>
 
         <pre><code class='javascript'>
@@ -72,8 +76,14 @@ class View {
     this.node = UL_NODE;
 
     this.updateView = function () {
+      // erase the previously displayed data from the node
       this.node.innerHTML = '';
+
+      // ask the controller for the data to be displayed
       const listOfEntries = controller.getData();
+
+      // create a separate li item for each received data entry
+      // and perform highlighting, if necessary
       for (const entry of listOfEntries) {
         let tempNode = document.createElement('li');
         tempNode.id = entry.id;
@@ -87,6 +97,9 @@ class View {
         let entryButton = document.createElement('button');
         entryButton.id = 'button' + entry.id;
         entryButton.innerText = 'Highlight me!';
+
+        // add an event listener to the button
+        // observe how the function is making use of the scope
         entryButton.addEventListener(
           'click',
           (function (idInternal) {
@@ -97,7 +110,8 @@ class View {
           })(entry.id)
         );
         tempNode.appendChild(entryButton);
-
+        
+        // append the newly created node to the ul and then continue the for-loop
         this.node.appendChild(tempNode);
       }
     };
@@ -105,6 +119,54 @@ class View {
 }
         </code></pre>
 
+          <h3>The controller</h3>
+          <p>
+            The controller is handling the information exchange between the model (data) and
+            the view. It does so by providing some get/set functions. Because objects are
+            accessed by reference, you can alter contents wherever you want, e.g. here: see the
+            <code>highlightSelectedNode()</code> function: it obtains the data from the model
+            by calling the controller's own <code>getData()</code> function. Then it loops
+            over the received entries adjusting the highlight-value of each entry.
+          </p>
+<pre><code class='javascript'>
+class Controller {
+  constructor() {
+    // this could also happen right away when controller is instantiated...
+    this.init = function () {
+      view.updateView();
+    };
+
+    this.getData = function () {
+      return model.entries;
+    };
+
+    this.highlightSelectedNode = function (id) {
+      let totalEntries = this.getData();
+      for (const entry of totalEntries) {
+        if (entry.id == id) {
+          entry.isHighlighted = true;
+        } else {
+          entry.isHighlighted = false;
+        }
+      }
+      view.updateView();
+    };
+  }
+}
+</code></pre>  
+
+<h3>Fire it up</h3>
+<p>Because we used classes, they need to be instantiated now. Instead of using classes, you could
+  have defined them as objects right away.
+</p>
+
+<pre><code class='javascript'>
+// Let's go!
+let model = new Model();
+let view = new View();
+let controller = new Controller();
+controller.init();
+</code></pre>
       </div>
     </header>
 
