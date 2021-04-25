@@ -1,8 +1,32 @@
 li.highlight {
-  background-color: aquamarine;
   font-weight: bold;
+  font-size: 14pt;
+  background-color: aquamarine;
+}
+
+h1, h2, h3, h4 {
+  font-family: sans-serif;
 }
 
 h1 {
   font-size: 16pt;
+}
+
+h2 {
+  font-size: 14pt;
+}
+
+h3 {
+  font-size: 13pt;
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 13pt;
+  font-style: italic;
+}
+
+p {
+  font-size: 12pt;
+  font-family: sans-serif;
 }
