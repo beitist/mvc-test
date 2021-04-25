@@ -2,6 +2,9 @@
 <html>
   <head>
     <title>mvc design pattern</title>
+    <link rel="stylesheet"
+    href="https://unpkg.com/@highlightjs/cdn-assets@10.7.2/styles/default.min.css">
+<script src="https://unpkg.com/@highlightjs/cdn-assets@10.7.2/highlight.min.js" defer></script>
     <link rel='stylesheet' src='design/style.css'></style>
     <script src='scripts/script.js' defer></script>
   </head>
@@ -11,17 +14,101 @@
     <header>
       <h1>Understanding the MVC design pattern</h1>
       <div class='text'>
-        <h4>What does this program do?</h4>
+        <h2>What does this program do?</h2>
         <p>
           This is a minimum-example to understand the MVC pattern with a non-fixed amount of data.
           You can control the number of list entries by updating the value below.
         </p>
+
         <p>
           <input id='number-of-entries'>
           <button id='update-entries' value='3'>Update</button>
         </p>
+
+        <p>
+          The software uses three separate and distinct objects to handle the view, the model (data)
+          and the actions (controller). Let's have a look at them:
+        </p>
+
+        <p><h3>The model (or: the data)</h3></p>
+        The model consists of a data container that holds data objects. There is also a little init routine
+        that creates the (fake) data when the model is instantiated.
+        <pre><code class='javascript'>
+// model
+class Model {
+  constructor() {
+    this.entries = [];
+
+    this.addEntry = function (id) {
+      this.entries.push(new DataEntry(id));
+    };
+
+    for (let i = 0; i < NUMBER_OF_ENTRIES; i++) {
+      this.addEntry(i);
+    }
+
+  }
+}
+
+class DataEntry {
+  constructor(id) {
+    this.id = id;
+    this.isHighlighted = false;
+  }
+}
+        </code></pre>
+
+        <h3>The view</h3>
+        <p>
+          The view is another object that updates the view output whenever it is called. It only
+          has one function. It does not contain any data by itself except the node where it
+          should attach the view objects to.
+        </p>
+
+        <pre><code class='javascript'>
+// view
+class View {
+  constructor() {
+    this.node = UL_NODE;
+
+    this.updateView = function () {
+      this.node.innerHTML = '';
+      const listOfEntries = controller.getData();
+      for (const entry of listOfEntries) {
+        let tempNode = document.createElement('li');
+        tempNode.id = entry.id;
+        tempNode.classList.add('entry');
+        tempNode.innerText = 'This is entry Nr. ' + entry.id;
+
+        if (entry.isHighlighted) {
+          tempNode.classList.add('highlight');
+        }
+
+        let entryButton = document.createElement('button');
+        entryButton.id = 'button' + entry.id;
+        entryButton.innerText = 'Highlight me!';
+        entryButton.addEventListener(
+          'click',
+          (function (idInternal) {
+            return function () {
+              console.log('Button clicked at ' + idInternal);
+              controller.highlightSelectedNode(idInternal);
+            };
+          })(entry.id)
+        );
+        tempNode.appendChild(entryButton);
+
+        this.node.appendChild(tempNode);
+      }
+    };
+  }
+}
+        </code></pre>
+
       </div>
     </header>
+
+
 
     <main>
       <ul id='entry-list'>

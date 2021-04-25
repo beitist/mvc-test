@@ -5,9 +5,11 @@ const UL_NODE = document.getElementById('entry-list');
 const INPUT_FIELD = document.getElementById('number-of-entries');
 const INPUT_BUTTON = document.getElementById('update-entries');
 
-const readInputField = function() {
+const readInputField = function () {
   NUMBER_OF_ENTRIES = INPUT_FIELD.value;
-}
+  model = new Model();
+  view.updateView();
+};
 
 INPUT_BUTTON.addEventListener('click', readInputField);
 
@@ -15,20 +17,13 @@ INPUT_BUTTON.addEventListener('click', readInputField);
 class Model {
   constructor() {
     this.entries = [];
-    this.addEntry = function(id) {
+
+    this.addEntry = function (id) {
       this.entries.push(new DataEntry(id));
-    }
+    };
 
     for (let i = 0; i < NUMBER_OF_ENTRIES; i++) {
       this.addEntry(i);
-    }
-
-    this.getEntrys = function() {
-      const entries = [];
-      for (const entry of this.entries) {
-        entries.push(entry);
-      }
-      return entries;
     }
 
   }
@@ -38,99 +33,74 @@ class DataEntry {
   constructor(id) {
     this.id = id;
     this.isHighlighted = false;
-    
-    this.getId = function() {
-      return this.id;
-    }
-
   }
 }
 
 // view
-
 class View {
   constructor() {
-    this.updateView = function() {
-      this.viewList.mainNode.innerHTML = '';
-      for (const entryView of this.viewList.entries) {
-        this.viewList.mainNode.appendChild(entryView.node);
+    this.node = UL_NODE;
+
+    this.updateView = function () {
+      this.node.innerHTML = '';
+      const listOfEntries = controller.getData();
+      for (const entry of listOfEntries) {
+        let tempNode = document.createElement('li');
+        tempNode.id = entry.id;
+        tempNode.classList.add('entry');
+        tempNode.innerText = 'This is entry Nr. ' + entry.id;
+
+        if (entry.isHighlighted) {
+          tempNode.classList.add('highlight');
+        }
+
+        let entryButton = document.createElement('button');
+        entryButton.id = 'button' + entry.id;
+        entryButton.innerText = 'Highlight me!';
+        entryButton.addEventListener(
+          'click',
+          (function (idInternal) {
+            return function () {
+              console.log('Button clicked at ' + idInternal);
+              controller.highlightSelectedNode(idInternal);
+            };
+          })(entry.id)
+        );
+        tempNode.appendChild(entryButton);
+
+        this.node.appendChild(tempNode);
       }
-    }
-
-    this.viewList = new ViewList();
-    
-    this.addEntry = function(id) {
-      this.viewList.entries.push(new EntryView(id));
-    }
-
-    this.checkIfIdExists = function(id) {
-      if (this.viewList.entries.find(id)) {
-        alert('Found!');
-      }
-    }
-
-
+    };
   }
 }
-
-class EntryView {
-  constructor(id) {
-    let tempNode = document.createElement('li');
-    tempNode.id = id;
-    tempNode.classList.add = 'entry';
-    tempNode.innerText = 'This is entry Nr. ' + id;
-
-    this.entryButton = document.createElement('button');
-    this.entryButton.id = 'button' + id;
-    this.entryButton.addEventListener('click', (function(idInternal) {
-      controller.highlightSelectedNode(idInternal);
-    })(id));
-    tempNode.appendChild(this.entryButton);
-
-    this.node = tempNode;
-    this.id = id;
-    this.isHighlighted = false;
-
-  }
-}
-
-class ViewList {
-  constructor() {
-    this.mainNode = UL_NODE;
-    this.entries = [];
-  }
-}
-
 
 
 // controller
 
 class Controller {
   constructor() {
-
-    this.init = function() {
-      this.createEntries();
-    }
-
-    this.createEntries = function() {
-      let totalEntries = model.getEntrys();
-      for (const entry of totalEntries) {
-        view.addEntry(entry.id);
-      }
+    this.init = function () {
       view.updateView();
-    }
+    };
 
-    this.highlightSelectedNode = function(id) {
-      let totalEntries = model.getEntrys();
+    this.getData = function () {
+      return model.entries;
+    };
+
+    this.highlightSelectedNode = function (id) {
+      let totalEntries = this.getData();
       for (const entry of totalEntries) {
-        entry.isHighlighted = false;
+        if (entry.id == id) {
+          entry.isHighlighted = true;
+        } else {
+          entry.isHighlighted = false;
+        }
       }
-      totalEntries[id].isHighlighted = true;
+
       view.updateView();
-    }
+    };
   }
 }
-
 
 // Let's go!
 
