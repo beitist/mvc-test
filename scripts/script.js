@@ -76,7 +76,6 @@ class View {
 
 
 // controller
-
 class Controller {
   constructor() {
     this.init = function () {
